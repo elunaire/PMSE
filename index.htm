@@ -1,0 +1,273 @@
+<html>
+
+<head>
+<title>PMSE - MakeBlockPage</title>
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="pmse_modular.js"></script>
+<meta name="description" content="Pretty Modular Symetric Encryption (PMSE) test page">
+	<meta name="keywords" content="encode, Symetric, Encryption, mot, de, passe, generate, password, PMSE">
+	<meta name="author" content="E. Lunaire">
+<script>
+
+var tempData;
+
+function MyRandomPass()    {
+	var mot ="";
+		var	caracteres = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ#&abcdefghijklmnopqrstuvwxyz"; // 64 chars-->
+		var t = new Date().getMilliseconds(); // get local time milliseconds 999 ms-->
+		var i=0;
+		var l=0;
+		var lon = 9 + (t%8);	
+		l = (t+1)%64;   
+		for (i=0; i < lon; i++){	
+			mot=mot.concat(caracteres.substring(l,l+1));		
+			if (l%2==0){
+				l = (t+(Math.floor((Math.random()*64))))%64;
+				l = (l+ t)%64;
+				t = 3*t + 11;				
+			}				
+			else{
+				t = t^0xA5;				
+				//l = (l*t + i)%64;
+				l = (!(l+1));
+				l = (t*i + l)%64;
+			}	
+						
+		}    
+	return (mot);		
+}
+
+// compute Hash function on a 32 bits register
+function hash32(tmp){ 
+  var hash = 0, i, chr;
+  if (tmp.length === 0) return hash;
+  for (i = 0; i < tmp.length; i++) {
+    chr   = tmp.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+}
+
+
+function salt_hex(){
+	var t = new Date().getMilliseconds();
+	var x = Math.floor(Math.random()*64);
+	var a = Math.floor(Math.random()*1024);
+    var sal = (a-t)*(a+t)*x - t+1;
+	sal = Math.abs(sal);
+  return (sal.toString(16));
+}
+
+
+function EncodeText(){
+	
+	var msg1 = document.getElementById("areaOut").value;
+	var mdp1 = document.getElementById("pwd1").value;
+	var mdp2 = document.getElementById("login1").value;	
+	var iv = document.getElementById("IV1").value;
+	var salt = document.getElementById("salt1").value;
+	var modul_algo_param = document.getElementById("modul1").value;
+	//enlarging passwords
+	mdp1 = hash32(mdp1).toString(32) + mdp1;
+	mdp2 = mdp2 + hash32(mdp2).toString(16);
+	var res = PMSE_enc_hex(msg1, mdp1, mdp2, iv , salt, modul_algo_param);
+	document.getElementById("areaOut").value = res;	
+	
+}
+
+function DecodeText(){
+	
+	var msg1 = document.getElementById("areaOut").value;
+	var mdp1 = document.getElementById("pwd1").value;
+	var mdp2 = document.getElementById("login1").value;	
+	var iv = document.getElementById("IV1").value;
+	var salt = document.getElementById("salt1").value;
+	var modul_algo_param = document.getElementById("modul1").value;
+	//enlarging passwords
+	mdp1 = hash32(mdp1).toString(32) + mdp1;
+	mdp2 = mdp2 + hash32(mdp2).toString(16);
+	var res = PMSE_dec_hex(msg1, mdp1, mdp2, iv , salt, modul_algo_param);
+	document.getElementById("areaOut").value = res;	
+}
+
+
+
+function genPass1(){
+ 	document.getElementById("pwd1").value = MyRandomPass() ;
+	
+}
+
+function genIV(){
+ 	document.getElementById("IV1").value = MyRandomPass() ;	
+}
+
+function genSalt(){
+ 	document.getElementById("salt1").value = salt_hex();	
+}
+
+function genPMSE_params(){
+	var	caracteres = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ#&abcdefghijklmnopqrstuvwxyz"; // 64 chars-->
+	var t = new Date().getMilliseconds(); // get local time milliseconds 999 ms-->
+	t= t%64;
+	var param = caracteres.substring(t,t+1);
+ 	document.getElementById("modul1").value = param ;	
+}
+
+function genLogin(){
+	var t = new Date().getMilliseconds() + 1; // get local time milliseconds 999 ms-->
+ 	
+	document.getElementById("login1").value = t.toString(16) + "_login" + t.toString(8);	
+}
+
+
+
+// download txt (no encoding)
+function download(filename, text) {
+    var element = document.createElement('a');
+	//element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('href', 'data:application/octet-stream,' + encodeURIComponent(text));
+	//element.setAttribute('href', text);
+	element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+function getparams(){
+
+	var mdp1 = document.getElementById("pwd1").value;
+	var mdp2 = document.getElementById("login1").value;	
+	var iv = document.getElementById("IV1").value;
+	var salt = document.getElementById("salt1").value;
+	var modul_algo_param = document.getElementById("modul1").value;
+	var cksum = document.getElementById("p_checksum").value;
+	download("YourPasswordsAndParametersForPMSE.txt", "\r\nLogin: "+mdp2+" \r\n\r\n -------- \r\nPassword: "+mdp1+"\r\n\r\n -------- \r\nIV: "+iv+" \r\n\r\n -------- \r\nSalt: "+salt+"\r\n -------- \r\nPMSE parameters: "+modul_algo_param+"\r\n -------- \r\nChecksum: "+cksum+"\r\n -------- \r\n\r\nPMSE Modular Encryption App - blocksnet.net");
+ 
+}
+
+function gettext(){
+	var msg1 = document.getElementById("areaOut").value;
+	download("YourEncryptedText.txt", msg1);
+ 
+}
+
+
+
+</script>
+
+</head>
+
+
+
+
+<div class="container">
+  <div class="jumbotron">
+    <h1>Pretty Modular Symetric Encryption</h1>
+    <p>	PMSE is really tunable ! It combines 1 or 2 passwords, pseudo-random key calculation, and data bytes swapping.</p> 
+  </div>
+  <div class="row">
+	<div class="col-sm-4">
+      <h3>" PMSE Algorithm"</h3>
+		<p> PMSE (Pretty Modular Symetric Encryption) use 1 or 2 passwords in order to create a pseudo-random key as long as the message to be encrypted. Encryption method tested with image encryption tends to the entropy obtained with One-Time-Pad encryption (cf. <a href="https://drive.google.com/file/d/14M2tsGI-ZS2ZZCwI98O7ecrf4wohrkHS/view?usp=sharing">ref</a>).</p>
+		<p> This encryption method appears to be fast and secure ! For more details, see the technical note available <a href="https://drive.google.com/file/d/14M2tsGI-ZS2ZZCwI98O7ecrf4wohrkHS/view?usp=sharing">here</a>. </p>
+		<p>	Algorithm of PMSE (pseudo-script):</p>
+		<pre>
+for (i=0; i.. message.length; i++){
+
+ // Pseudo random byte generation		
+    // polynomial order 1 or 2  (params: order, b_ and div_)        
+    Yn = x2*i*i + b_*x1*i + Yn>>div_; 
+		
+	xa = (Yn & 0xFF000000)>>24 ;
+	xb = (Yn & 0xFF0000)>>16 ;
+	xc = (Yn & 0xFF00)>>8 ;
+	xd = Yn & 0xFF;
+	x0 = (xa^xb^xc^xd); //x0 ~> "crc8" of Yn
+				
+	x1 =  password[i % password.length]; // simple itterative selection of password char
+	x2 =  login[x1 % login.length]; // char selection depanding on x1
+	x3 = (i*x1 - x3*x2)%255; // x3 depends on i, x1, x2 and from previous x3
+	xt = (xt^x0^x1^x2^x3)&0xFF;  // pseudo-random key for xor encryption, depends on x0, x1, x2, x3 and previous xt
+		
+		if (xt==0){
+			// reinit of the algo with IV values
+			x0=i%iv(0); x1=i%iv(1); x2=i%iv(2); x3=i%iv(3); xt=i%iv(4); Yn = i%iv(5);
+		}
+		
+ // reversible bit switching (several permuation and complementation cases varying with params)
+	message_swapped[i] = bit_switching(message[i]);	
+
+ // XOR encryption
+	crypt = (message_swapped[i] ^ xt )&0xFF; 
+
+}</pre>
+		
+	</div>   
+
+   <div class="col-sm-4">
+      <h3>Login</h3>
+        <p><input type="text"  size="25" maxlength="64" style="text-align:center; color: blue; backgfloor:#FFFFFF; font-size:17;" id="login1" />
+		<input type="button" style="font-size:15; font-family: impact;" value="Random login" onClick="javascript:genLogin()"/>
+		</p>
+	  <h3>Password</h3>
+        <p><input type="text"  size="25" maxlength="64" style="text-align:center; color: blue; backgfloor:#FFFFFF; font-size:17;" id="pwd1" />
+		<input type="button" style="font-size:15; font-family: impact;" value="Generate password" onClick="javascript:genPass1()"/>
+		</p>
+	  <h3>Salt</h3>
+        <p><input type="text"  size="25" maxlength="64" style="text-align:center; color: blue; backgfloor:#FFFFFF; font-size:17;" id="salt1" />
+		<input type="button" style="font-size:15; font-family: impact;" value="Generate salt" onClick="javascript:genSalt()"/>
+		</p>
+	  <h3>IV</h3>
+        <p><input type="text"  size="25" maxlength="64" style="text-align:center; color: blue; backgfloor:#FFFFFF; font-size:17;" id="IV1" />
+		<input type="button" style="font-size:15; font-family: impact;" value="Generate IV" onClick="javascript:genIV()"/>
+		</p>
+	  <h3>PMSE modularity</h3>
+        <p><input type="text"  size="25" maxlength="64" style="text-align:center; color: blue; backgfloor:#FFFFFF; font-size:17;" id="modul1" />
+		<input type="button" style="font-size:15; font-family: impact;" value="Generate parameters" onClick="javascript:genPMSE_params()"/>
+		</p>
+	  <h3>Checksum (hex)</h3>
+		<p><input type="text" readonly  size="36" maxlength="230" style="text-align:center; color: green; backgfloor:#FFFFFF; font-size:16;" id="p_checksum" />
+		</p>
+	  <p><input type="button" style="font-size:15; font-family: impact;" value="Download passwords and PMSE parameters" onClick="javascript:getparams()"/>
+		</p>
+		
+		
+		
+	</div>
+	<div class="col-sm-4">
+        
+      <h3>Clear/Encrypted text</h3>
+	  
+		<p><input type="button" style="font-size:15; font-family: impact;" value="Encode" onClick="javascript:EncodeText()"/>
+		</p>
+		<p><input type="button" style="font-size:15; font-family: impact;" value="Decode" onClick="javascript:DecodeText()"/>
+		</p>
+		<p>	<textarea id="areaOut" rows=20 cols=35 style="font-size:13; font-family: arial; text-align:center; ">Text to be encrypted... Copy-paste here your text for encryption or decryption.</textarea>
+		</p>
+		<p><input type="button" style="font-size:15; font-family: impact;" value="Download text" onClick="javascript:gettext()"/>
+		</p>
+		
+
+	</div>
+</div>
+
+	
+
+
+ <footer class="footer">
+        <p align="center"> _______________________________________________________ </p>
+		<p align="center"> External link : <A HREF="http://www.blocksnet.net"> Blocksnet::Self-decryptionable web objects </A> </p>
+      </footer>
+
+
+
+</html>
