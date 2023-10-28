@@ -31,8 +31,7 @@ for (i=0; i.. message.length; i++){
 			// reinit of the algo with IV values
 			x0=i%iv(0); x1=i%iv(1); x2=i%iv(2); x3=i%iv(3); xt=i%iv(4); Yn = i%iv(5);
 		}
-		
- // reversible bit switching (several permuation and complementation cases varying with params)
+  // reversible bit switching (several permuation and complementation cases varying with params)
 	message_swapped[i] = bit_switching(message[i]);	
 
  // XOR encryption
