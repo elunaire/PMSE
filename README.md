@@ -3,6 +3,8 @@ Pretty Modular Symetric Encryption (PMSE)
 
 Web demo of PMSE:  http://blocksnet.free.fr/PMSE/
 
+Web PMSE file encrypter: http://blocksnet.free.fr/PMSE/pmse_file_encrypter/
+
 Web demo of PULS (PRNG of PMSE): http://blocksnet.free.fr/PRNG/
 
 Preprint: https://doi.org/10.48550/arXiv.1905.08150
