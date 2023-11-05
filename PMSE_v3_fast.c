@@ -40,11 +40,11 @@ int i=0;
 
           if (xt==0){
 
-            xt = i%iv[14];
-            x0 = i%iv[15];
-            x1 = i%iv[16];
-            x2 = i%iv[17];
-            x3 = i%iv[18];
+            xt = i%iv[0];
+            x0 = i%iv[1];
+            x1 = i%iv[2];
+            x2 = i%iv[3];
+            x3 = i%iv[4];
 
           }
 		  ////////////////////////////////////////
@@ -53,19 +53,19 @@ int i=0;
           data = msg[i];
           if ((xd & 0x03)==0){
                 data = ((data&0x0F)<<4) + ((data&0xF0)>>4);
-               // data = data^0xC0;
+               
           }
           if ((xd & 0x03)==1){
                 data = ((data&0x3F)<<2) + ((data&0xC0)>>6);
-               // data = data^0x0A;
+               
           }
           if ((xd & 0x03)==2){
                 data = ((data&0x33)<<2) + ((data&0xCC)>>2);
-               // data = data^0xA0;
+               
           }
           if ((xd & 0x03)==3){
                 data = ((data&0x1F)<<3) + ((data&0xE0)>>5);
-               // data = data^0x0C;
+               
           }
 
         //////////////////////////
@@ -111,11 +111,11 @@ int i=0;
 
           if (xt==0){
 
-            xt = i%iv[14];
-            x0 = i%iv[15];
-            x1 = i%iv[16];
-            x2 = i%iv[17];
-            x3 = i%iv[18];
+            xt = i%iv[0];
+            x0 = i%iv[1];
+            x1 = i%iv[2];
+            x2 = i%iv[3];
+            x3 = i%iv[4];
 
           }
           data = msg[i];
@@ -131,19 +131,19 @@ int i=0;
 
           if ((xd & 0x03)==0){
                 data = ((data&0x0F)<<4) + ((data&0xF0)>>4);
-               // data = data^0xC0;
+               
           }
           if ((xd & 0x03)==1){
                 data = ((data&0xFC)>>2) + ((data&0x03)<<6);
-               // data = data^0x0A;
+               
           }
           if ((xd & 0x03)==2){
                 data = ((data&0x33)<<2) + ((data&0xCC)>>2);
-               // data = data^0xA0;
+               
           }
           if ((xd & 0x03)==3){
                 data = ((data&0xF8)>>3) + ((data&0x07)<<5);
-               // data = data^0x0C;
+               
           }
 
         msg[i]=data;
